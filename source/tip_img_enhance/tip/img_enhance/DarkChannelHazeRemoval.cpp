@@ -32,8 +32,6 @@ remove_haze(
         darkChannelNeighHalfSize
     );
 
-    cv::imshow("Init dark channel", initDarkChannel);
-
     const auto &atmosphericLight = estimate_atmospheric_light_top_dch(
         inputBgrImage,
         initDarkChannel,
@@ -48,16 +46,12 @@ remove_haze(
         darkChannelNeighHalfSize
     );
 
-    cv::imshow("Dark channel", darkChannel);
-
     cv::Mat_<float> transmission;
     compute_transmission(
         darkChannel,
         transmission,
         darkChannelMultiplier
     );
-
-    cv::imshow("Transmission", transmission);
 
     // TODO: Apply soft matting and bilateral filter to tranmission.
     cv::Mat_<float> adjustedTransmission;
@@ -70,7 +64,6 @@ remove_haze(
     //       or just calculating transmission map at half the resolution.
     cv::bilateralFilter(transmission, adjustedTransmission, -1, 0.3, 5, cv::BORDER_REPLICATE);
 
-    cv::imshow("Adjusted transmission", adjustedTransmission);
     // See e.g.: https://stackoverflow.com/questions/55353735/how-to-do-alpha-matting-in-python
     // or go with simpler: https://github.com/He-Zhang/image_dehaze/blob/master/dehaze.py
 
