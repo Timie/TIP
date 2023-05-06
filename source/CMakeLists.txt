@@ -30,15 +30,10 @@ message(STATUS "C++ Compiler is: ${CMAKE_CXX_COMPILER}")
 # Set default standard to C++20
 set(TIP_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD ${TIP_CXX_STANDARD})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add reasonable compile-time definitions.
 add_compile_definitions(_USE_MATH_DEFINES)
-
-
-# Enable and force C++11 standard
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 # * Configuration *
 option(TIP_LIBS_SHARED

@@ -24,38 +24,21 @@ remove_haze(
     {
         transmissionRefinementWindowHalfSize = darkChannelNeighHalfSize;
     }
-
-    cv::Mat_<float> initDarkChannel;
-    compute_dark_channel(
-        inputBgrImage,
-        initDarkChannel,
-        darkChannelNeighHalfSize
-    );
-
-    const auto &atmosphericLight = estimate_atmospheric_light_top_dch(
-        inputBgrImage,
-        initDarkChannel,
-        atmoMinTopRatio
-    );
-
-    cv::Mat_<float> darkChannel;
-    compute_dark_channel(
-        inputBgrImage,
-        darkChannel,
-        atmosphericLight,
-        darkChannelNeighHalfSize
-    );
-
+    
+    cv::Vec3f atmosphericLight;
     cv::Mat_<float> transmission;
-    compute_transmission(
-        darkChannel,
+    estimate_transmission(
+        inputBgrImage,
         transmission,
+        atmosphericLight,
+        darkChannelNeighHalfSize,
+        atmoMinTopRatio,
         darkChannelMultiplier
     );
 
     // TODO: Apply soft matting and bilateral filter to tranmission.
     cv::Mat_<float> adjustedTransmission;
-    tip::img_enhance::fast_guided_filter::matte_alpha_channel_rgb_full(
+    tip::img_enhance::fast_guided_filter::matte_alpha_channel_rgb_fast(
         inputBgrImage, transmission, transmission, transmissionRefinementWindowHalfSize);
     
     // TODO: This seems to introduce bit of value quantisation to the transmission map.
@@ -63,9 +46,6 @@ remove_haze(
     //       the clarity of fine details in the resulting image. We may try replacing it with different filters (box, guasss, dilate),
     //       or just calculating transmission map at half the resolution.
     cv::bilateralFilter(transmission, adjustedTransmission, -1, 0.3, 5, cv::BORDER_REPLICATE);
-
-    // See e.g.: https://stackoverflow.com/questions/55353735/how-to-do-alpha-matting-in-python
-    // or go with simpler: https://github.com/He-Zhang/image_dehaze/blob/master/dehaze.py
 
     recover_radiance(
        inputBgrImage,
@@ -355,4 +335,44 @@ recover_radiance(
             const float effectiveInvT0 = 1 / std::max(t1, minTransmission);
             outputColour = (colour - invAtmlight) * effectiveInvT0;
         });
+}
+
+
+TIP_IMG_IMPROV_API
+void 
+tip::img_enhance::dark_channel::
+estimate_transmission(
+    const cv::Mat_<cv::Vec3f> &inputBgrImage,
+    cv::Mat_<float> &transmission,
+    cv::Vec3f &atmosphericLight,
+    int darkChannelNeighHalfSize,
+    float atmoMinTopRatio,
+    float darkChannelMultiplier)
+{
+    cv::Mat_<float> initDarkChannel;
+    compute_dark_channel(
+        inputBgrImage,
+        initDarkChannel,
+        darkChannelNeighHalfSize
+    );
+
+    atmosphericLight = estimate_atmospheric_light_top_dch(
+        inputBgrImage,
+        initDarkChannel,
+        atmoMinTopRatio
+    );
+
+    cv::Mat_<float> darkChannel;
+    compute_dark_channel(
+        inputBgrImage,
+        darkChannel,
+        atmosphericLight,
+        darkChannelNeighHalfSize
+    );
+
+    compute_transmission(
+        darkChannel,
+        transmission,
+        darkChannelMultiplier
+    );
 }

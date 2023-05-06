@@ -31,6 +31,16 @@ namespace tip::img_enhance::dark_channel
         float minTransmission = 0.1f,
         int transmissionRefinementWindowHalfSize = -1);
 
+    TIP_IMG_IMPROV_API
+    void estimate_transmission(
+        const cv::Mat_<cv::Vec3f> &inputBgrImage,
+        cv::Mat_<float> &transmission,
+        cv::Vec3f &atmosphericLight,
+        int darkChannelNeighHalfSize = 7,
+        float atmoMinTopRatio = 0.01f,
+        float darkChannelMultiplier = 0.95f);
+
+
     /**
      * Calculates dark channel from the image.
      * 

@@ -22,7 +22,7 @@ Note that implementation is released under MIT licence (see the LICENCE file in 
 ## TODO
 Items to be tackled next (not in any particular order):
 * Move to git submodules for internal libraries
-* Integrate/reuse some of the benchmarks for dehazing
+* Integrate/reuse some of the benchmarks for dehazing, eg. http://www.alphamatting.com
 * Dark Channel Prior Dehazing:
   * Experiment with postprocessing of transmission map (multiple passes of guided filter, additional blur/dilation, calculating it at half the resolution).
   * Experiment with bilateral filter before dehazing.
